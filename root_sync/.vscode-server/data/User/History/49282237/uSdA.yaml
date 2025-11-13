@@ -1,0 +1,110 @@
+# yolo11n_cbam.yaml
+# Custom YOLO11n-style detector with CBAM attention for 12-class AgroPest dataset
+# Works with: from ultralytics import YOLO; model = YOLO("yolo11n_cbam.yaml")
+
+# number of classes
+nc: 12
+
+# model scale (YOLOv8/11 风格，n 版的小模型)
+depth_multiple: 0.33
+width_multiple: 0.25
+
+# ---------------------------------------------------------------
+# Backbone
+# [from, repeats, module, args]
+# ---------------------------------------------------------------
+backbone:
+  # 0: P1/2
+  - [-1, 1, Conv, [64, 3, 2]]
+
+  # 1: P2/4
+  - [-1, 1, Conv, [128, 3, 2]]
+
+  # 2: C2f block 提取低层特征
+  - [-1, 3, C2f, [128, True]]
+
+  # 3: CBAM 加在浅层特征后，强调纹理和边缘
+  - [-1, 1, CBAM, [128]]
+
+  # 4: P3/8
+  - [-1, 1, Conv, [256, 3, 2]]
+
+  # 5: 中层特征
+  - [-1, 6, C2f, [256, True]]
+
+  # 6: CBAM 针对中层特征（对小害虫很重要）
+  - [-1, 1, CBAM, [256]]
+
+  # 7: P4/16
+  - [-1, 1, Conv, [512, 3, 2]]
+
+  # 8: 高层特征
+  - [-1, 6, C2f, [512, True]]
+
+  # 9: CBAM 高层注意力，抑制复杂背景
+  - [-1, 1, CBAM, [512]]
+
+  # 10: P5/32
+  - [-1, 1, Conv, [1024, 3, 2]]
+
+  # 11: 深层语义
+  - [-1, 3, C2f, [1024, True]]
+
+  # 12: SPPF 聚合感受野
+  - [-1, 1, SPPF, [1024, 5]]
+
+# ---------------------------------------------------------------
+# Head (PAN/FPN with P3, P4, P5 outputs)
+# ---------------------------------------------------------------
+head:
+  # 上采样到 P4，融合 backbone P4 特征 (index 9)
+  # 13
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+
+  # 14: concat [13, 9] -> 融合深层与高层
+  - [[-1, 9], 1, Concat, [1]]
+
+  # 15: C2f refine
+  - [-1, 3, C2f, [512]]
+
+  # 16: 可选 CBAM，加一点注意力
+  - [-1, 1, CBAM, [512]]
+
+  # 上采样到 P3，融合 backbone P3 特征 (index 6)
+  # 17
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+
+  # 18: concat [17, 6]
+  - [[-1, 6], 1, Concat, [1]]
+
+  # 19: C2f -> P3/8 (small objects)
+  - [-1, 3, C2f, [256]]
+
+  # 20: CBAM for P3，小目标害虫重点关注
+  - [-1, 1, CBAM, [256]]
+
+  # 下采样回 P4，和 16 融合
+  # 21
+  - [-1, 1, Conv, [256, 3, 2]]
+
+  # 22: concat [21, 16] -> P4 路径
+  - [[-1, 16], 1, Concat, [1]]
+
+  # 23: C2f -> P4/16
+  - [-1, 3, C2f, [512]]
+
+  # 下采样回 P5，和 12 融合
+  # 24
+  - [-1, 1, Conv, [512, 3, 2]]
+
+  # 25: concat [24, 12] -> P5 路径
+  - [[-1, 12], 1, Concat, [1]]
+
+  # 26: C2f -> P5/32
+  - [-1, 3, C2f, [1024]]
+
+  # 27: Detect heads on P3, P4, P5
+  #    P3: index 20
+  #    P4: index 23
+  #    P5: index 26
+  - [[20, 23, 26], 1, Detect, [nc]]

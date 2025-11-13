@@ -1,0 +1,108 @@
+# This file created by conda-build 3.22.0
+# meta.yaml template originally from:
+# /feedstock/recipe, last modified Fri Oct 28 06:59:30 2022
+# ------------------------------------------------
+
+package:
+  name: conda-package-handling
+  version: 1.9.0
+source:
+  sha256: 81e0771b8b10ab5c20678a5da714e36d97e321acfc3e5b304ec2e650ce84734b
+  url: https://github.com/conda/conda-package-handling/archive/1.9.0.tar.gz
+build:
+  entry_points:
+    - cph = conda_package_handling.cli:main
+  number: '1'
+  script: /croot/conda-package-handling_1666940373510/_h_env_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_placehold_plac/bin/python
+    -m pip install . --no-deps -vv
+  string: py310h5eee18b_1
+requirements:
+  build:
+    - _libgcc_mutex 0.1 main
+    - _openmp_mutex 5.1 1_gnu
+    - _sysroot_linux-64_curr_repodata_hack 3 haa98f57_10
+    - binutils_impl_linux-64 2.38 h2a08ee3_1
+    - binutils_linux-64 2.38.0 hc2dff05_0
+    - gcc_impl_linux-64 11.2.0 h1234567_1
+    - gcc_linux-64 11.2.0 h5c386dc_0
+    - kernel-headers_linux-64 3.10.0 h57e8cba_10
+    - ld_impl_linux-64 2.38 h1181459_1
+    - libgcc-devel_linux-64 11.2.0 h1234567_1
+    - libgcc-ng 11.2.0 h1234567_1
+    - libgomp 11.2.0 h1234567_1
+    - libstdcxx-ng 11.2.0 h1234567_1
+    - sysroot_linux-64 2.17 h57e8cba_10
+  host:
+    - _libarchive_static_for_cph 3.6.1 h6926279_0
+    - _libgcc_mutex 0.1 main
+    - _openmp_mutex 5.1 1_gnu
+    - bzip2 1.0.8 h7b6447c_0
+    - ca-certificates 2022.10.11 h06a4308_0
+    - certifi 2022.9.24 py310h06a4308_0
+    - cython 0.29.32 py310h6a678d5_0
+    - ld_impl_linux-64 2.38 h1181459_1
+    - libffi 3.3 he6710b0_2
+    - libgcc-ng 11.2.0 h1234567_1
+    - libgomp 11.2.0 h1234567_1
+    - libstdcxx-ng 11.2.0 h1234567_1
+    - libuuid 1.0.3 h7f8727e_2
+    - lz4-c 1.9.3 h295c915_1
+    - ncurses 6.3 h5eee18b_3
+    - openssl 1.1.1q h7f8727e_0
+    - pip 22.2.2 py310h06a4308_0
+    - python 3.10.6 haa1d7c7_1
+    - readline 8.2 h5eee18b_0
+    - setuptools 63.4.1 py310h06a4308_0
+    - sqlite 3.39.3 h5082296_0
+    - tk 8.6.12 h1ccaba5_0
+    - tzdata 2022e h04d1e81_0
+    - wheel 0.37.1 pyhd3eb1b0_0
+    - xz 5.2.6 h5eee18b_0
+    - zlib 1.2.13 h5eee18b_0
+    - zstd 1.5.2 ha4553b6_0
+  run:
+    - libgcc-ng >=11.2.0
+    - python >=3.10,<3.11.0a0
+    - tqdm
+test:
+  commands:
+    - pytest -v --cov=tests/ --cov-report=xml --color=yes tests/ -k "not test_secure_refusal_to_extract_abs_paths"
+  imports:
+    - conda_package_handling
+    - conda_package_handling.archive_utils_cy
+  requires:
+    - mock
+    - pytest
+    - pytest-cov
+    - pytest-mock
+  source_files:
+    - tests
+about:
+  description: 'cph is an abstraction of conda package handling and a tool for extracting,
+    creating, and converting between formats.
+
+    '
+  dev_url: https://github.com/conda/conda-package-handling
+  doc_url: https://github.com/conda/conda-package-handling/blob/main/README.md
+  home: https://github.com/conda/conda-package-handling
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file:
+    - LICENSE
+    - static_deps_licenses/bzip2.txt
+    - static_deps_licenses/libarchive.txt
+    - static_deps_licenses/zlib.txt
+    - static_deps_licenses/zstd.txt
+  license_url: https://github.com/conda/conda-package-handling/blob/main/LICENSE
+  summary: Create and extract conda packages of various formats
+extra:
+  copy_test_source_files: true
+  final: true
+  flow_run_id: 6a75452f-665e-44a8-acd8-1c7770bd86a0
+  recipe-maintainers:
+    - beckermr
+    - dbast
+    - jezdez
+    - msarahan
+  remote_url: git@github.com:AnacondaRecipes/conda-package-handling-feedstock.git
+  sha: 2c7e90bf5cbcfc088878afbf57d68c2782a92f35
