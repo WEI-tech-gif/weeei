@@ -1,0 +1,77 @@
+# yolo11n_cbam.yaml
+# YOLO-style detector with CBAM for 12-class AgroPest
+
+nc: 12
+
+
+depth_multiple: 1.0
+width_multiple: 1.0
+
+backbone:
+  # [from, repeats, module, args]
+
+  # 0: P1/2
+  - [-1, 1, Conv, [64, 3, 2]]
+  # 1: P2/4
+  - [-1, 1, Conv, [128, 3, 2]]
+  # 2: C2f (128 channels)
+  - [-1, 3, C2f, [128, True]]
+  # 3: CBAM on 128-ch feature
+  - [-1, 1, CBAM, [128]]
+
+  # 4: P3/8
+  - [-1, 1, Conv, [256, 3, 2]]
+  # 5: C2f (256)
+  - [-1, 6, C2f, [256, True]]
+  # 6: CBAM on 256-ch feature
+  - [-1, 1, CBAM, [256]]
+
+  # 7: P4/16
+  - [-1, 1, Conv, [512, 3, 2]]
+  # 8: C2f (512)
+  - [-1, 6, C2f, [512, True]]
+  # 9: CBAM on 512-ch feature
+  - [-1, 1, CBAM, [512]]
+
+  # 10: P5/32
+  - [-1, 1, Conv, [1024, 3, 2]]
+  # 11: C2f (1024)
+  - [-1, 3, C2f, [1024, True]]
+  # 12: SPPF
+  - [-1, 1, SPPF, [1024, 5]]
+
+head:
+  # 13: upsample 12 -> P4 size
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  # 14: concat with backbone P4 (index 9)
+  - [[-1, 9], 1, Concat, [1]]
+  # 15: C2f (512)
+  - [-1, 3, C2f, [512]]
+  # 16: CBAM on P4
+  - [-1, 1, CBAM, [512]]
+
+  # 17: upsample -> P3 size
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  # 18: concat with backbone P3 (index 6)
+  - [[-1, 6], 1, Concat, [1]]
+  # 19: C2f (256)  -> P3/8 (small objects)
+  - [-1, 3, C2f, [256]]
+  # 20: CBAM on P3
+  - [-1, 1, CBAM, [256]]
+
+  # 21: downsample P3 -> P4
+  - [-1, 1, Conv, [256, 3, 2]]
+  # 22: concat with 16 (P4 CBAM)
+  - [[-1, 16], 1, Concat, [1]]
+  # 23: C2f (512) -> P4/16
+  - [-1, 3, C2f, [512]]
+
+  # 24: downsample P4 -> P5
+  - [-1, 1, Conv, [512, 3, 2]]
+  # 25: concat with 12 (SPPF out)
+  - [[-1, 12], 1, Concat, [1]]
+  # 26: C2f (1024) -> P5/32
+  - [-1, 3, C2f, [1024]]
+
+  # 27: Detect heads on P3, P4, P5
+  - [[20, 23, 26], 1, Detect, [nc]]
